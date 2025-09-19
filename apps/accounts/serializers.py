@@ -31,8 +31,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop("password_confirm")
-        user = User.objects.create(**validated_data)
+        validated_data.pop('password_confirm')
+        user = User.objects.create_user(**validated_data)
         return user
 
 
@@ -57,17 +57,18 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {"message": "User account is disabled."}
                 )
+            attrs["user"] = user
+            return attrs
         else:
             raise serializers.ValidationError(
                 {"message": "Must provide email and password."}
             )
-        return attrs
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """User profile serializer"""
 
-    full_name = serializers.ReadOnlyField(source="full_name")
+    full_name = serializers.ReadOnlyField()
     posts_count = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
 
@@ -90,10 +91,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created_at", "updated_at")
 
     def get_posts_count(self, obj):
-        pass
+        try:
+            return obj.posts.count()
+        except AttributeError:
+            return 0
 
     def get_comments_count(self, obj):
-        pass
+        try:
+            return obj.comments.count()
+        except AttributeError:
+            return 0
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
