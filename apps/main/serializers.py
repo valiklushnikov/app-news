@@ -45,7 +45,7 @@ class PostSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if len(data["content"]) > 200:
-            data["content"] = data["content"][:200] + '...'
+            data["content"] = data["content"][:200] + "..."
         return data
 
 
